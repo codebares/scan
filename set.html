@@ -21,8 +21,11 @@
   <p>Your server's public IP address is: <span id="ip-address">Loading...</span></p>
 
   <script>
-    // Fetch the public IP address from the JSON endpoint
-    fetch('https://onta.dz/indevinablement/ip.json')
+    // Use a CORS proxy to fetch the IP address
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const targetUrl = 'https://onta.dz/indevinablement/ip.json';
+
+    fetch(proxyUrl + targetUrl)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
