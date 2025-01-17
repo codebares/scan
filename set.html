@@ -21,21 +21,22 @@
   <p>Your server's public IP address is: <span id="ip-address">Loading...</span></p>
 
   <script>
-    // Fetch the public IP address from your PHP API
-    fetch('http://105.98.150.153:3000/public_ip_api.php')
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'success') {
-          // Display the IP address
-          document.getElementById('ip-address').textContent = data.ip;
-        } else {
-          // Display an error message
-          document.getElementById('ip-address').textContent = 'Error: ' + data.message;
+    // Fetch the public IP address from the JSON endpoint
+    fetch('https://onta.dz/indevinablement/ip.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
+        return response.json();
+      })
+      .then(data => {
+        // Display the IP address
+        document.getElementById('ip-address').textContent = data.ip;
       })
       .catch(error => {
-        // Handle network errors
-        document.getElementById('ip-address').textContent = 'Network error: ' + error.message;
+        // Handle errors
+        console.error('Error fetching IP address:', error);
+        document.getElementById('ip-address').textContent = 'Error: ' + error.message;
       });
   </script>
 </body>
