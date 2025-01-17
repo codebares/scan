@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Public IP Address</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #ip-address {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #2196f3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Public IP Address</h1>
+  <p>Your server's public IP address is: <span id="ip-address">Loading...</span></p>
+
+  <script>
+    // Fetch the public IP address from your PHP API
+    fetch('http://105.98.150.153:3000/public_ip_api.php')
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Display the IP address
+          document.getElementById('ip-address').textContent = data.ip;
+        } else {
+          // Display an error message
+          document.getElementById('ip-address').textContent = 'Error: ' + data.message;
+        }
+      })
+      .catch(error => {
+        // Handle network errors
+        document.getElementById('ip-address').textContent = 'Network error: ' + error.message;
+      });
+  </script>
+</body>
+</html>
