@@ -24,42 +24,32 @@
 
   <script>
     document.getElementById('sendRequest').addEventListener('click', () => {
-   const url = 'https://105.98.186.139:3000/send';
+      const url = 'http://105.98.186.139:3000/send'; // Update to https if your server supports it
       const data = {
-        // Replace with the actual payload expected by the API
         message: "Hello, API!",
-        recipient: "user@example.com"
+        recipient: "user@example.com",
       };
-  
-      // Make the API request
+
       fetch(url, {
-        method: 'POST', // Use 'GET' if the endpoint expects a GET request
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data), // Omit if the request method is GET
+        body: JSON.stringify(data),
       })
         .then(response => {
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          return response.text(); // Read as text to avoid JSON parse errors
+          return response.json(); // Read as JSON
         })
-        .then(data => {
-          try {
-            const jsonData = JSON.parse(data); // Try parsing as JSON
-            document.getElementById('response').textContent = JSON.stringify(jsonData, null, 2);
-          } catch (e) {
-            // If not JSON, display as plain text
-            document.getElementById('response').textContent = data;
-          }
+        .then(json => {
+          document.getElementById('response').textContent = JSON.stringify(json, null, 2);
         })
         .catch(error => {
-          // Display errors in the div
           document.getElementById('response').textContent = `Error: ${error.message}`;
         });
     });
   </script>
-  
 </body>
 </html>
