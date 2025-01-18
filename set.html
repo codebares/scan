@@ -1,1 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test API Request</h1>
+    <button id="sendRequest">Send Request</button>
+    <div id="response"></div>
 
+    <script>
+        document.getElementById('sendRequest').addEventListener('click', function() {
+            // Define the data to send in the request
+            const data = {
+                key1: 'value1',
+                key2: 'value2'
+            };
+
+            // Send a POST request to the API
+            fetch('http://105.98.80.140:3000/index.php/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Display the response in the #response div
+                document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+            })
+            .catch(error => {
+                // Handle any errors
+                document.getElementById('response').textContent = 'Error: ' + error.message;
+            });
+        });
+    </script>
+</body>
+</html>
