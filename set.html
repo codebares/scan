@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -8,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <style>
         /* General Styles */
         body {
@@ -123,183 +123,223 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 
     <script>
-$(document).ready(function () {
-    const beepSound = document.getElementById('beepSound');
-    const negativeToneSound = document.getElementById('negativeToneSound');
-    negativeToneSound.volume = 0.01; // Lower the volume of the negative tone sound
-    negativeToneSound.loop = true; // Set the negative sound to loop
-    let codeReader;
-    let scanTimeout; // To store the timeout for scanning
-
-    // Function to replace commas with dots in the input
-    function replaceCommaWithDot(value) {
-        return value.replace(/,/g, '.');
-    }
-
-    // Function to play the negative tone sound
-    function playNegativeSound() {
-        negativeToneSound.play().catch(error => {
-            console.error("Error playing negative sound:", error);
-        });
-    }
-
-    // Function to stop the negative tone sound
-    function stopNegativeSound() {
-        negativeToneSound.pause();
-        negativeToneSound.currentTime = 0; // Reset the sound to the beginning
-    }
-
-    // Update the price display
-    $('#price').on('input', function () {
-        const price = $(this).val();
-        // Replace commas with dots in the input
-        const formattedPrice = replaceCommaWithDot(price);
-        // Update the green price display with the exact value
-        $('#priceValue').text(formattedPrice || '0.00');
-    });
-
-    // Reset the form
-    $('#resetForm').on('click', function () {
-        $('#barcode').val('');
-        $('#price').val('');
-        $('#priceValue').text('0.00'); // Reset to 0.00
-        $('#message').html('');
-        $('#productList').html('');
-        $('#reader').hide();
-        if (codeReader) {
-            codeReader.reset(); // Stop ZXing
-        }
-        stopNegativeSound(); // Stop the negative tone
-        clearTimeout(scanTimeout); // Clear the scanning timeout
-        $('#message').html('<div class="alert alert-info">تم إعادة تعيين النموذج بنجاح.</div>');
-    });
-
-    // Initialize barcode scanning with ZXing
-    $('#scanBarcode').on('click', function () {
-        $('#reader').show();
-
-        // Play the negative sound in a loop when the camera starts
-        playNegativeSound();
-
-        // Start a timeout for scanning
-        scanTimeout = setTimeout(function () {
-            // If no barcode is detected within 10 seconds, stop the scanner
-            $('#message').html('<div class="alert alert-warning">فشل في الكشف عن الباركود. يرجى المحاولة مرة أخرى.</div>');
-            stopNegativeSound(); // Stop the negative sound
-            codeReader.reset(); // Stop ZXing
-            $('#reader').hide(); // Hide the scanner
-        }, 10000); // 10 seconds timeout
-
-        codeReader = new ZXing.BrowserMultiFormatReader();
-        console.log('ZXing code reader initialized');
-
-        // List available video devices and use the back camera
-        codeReader.listVideoInputDevices()
-            .then(videoInputDevices => {
-                if (videoInputDevices.length > 0) {
-                    // Find the back camera
-                    const backCamera = videoInputDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear') || device.label.toLowerCase().includes('environment'));
-                    const deviceId = backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId; // Use back camera if found, else use the first camera
-                    codeReader.decodeFromVideoDevice(deviceId, 'video', (result, err) => {
-                        if (result) {
-                            console.log("Barcode detected:", result.text);
-                            $('#barcode').val(result.text);
-                            $('#message').html('<div class="alert alert-success">تم الكشف عن الباركود بنجاح!</div>');
-
-                            // Play the beep sound
-                            beepSound.play().catch(error => {
-                                console.error("Error playing beep sound:", error);
-                            });
-
-                            // Stop ZXing
-                            codeReader.reset();
-                            $('#reader').hide();
-
-                            // Stop the negative sound
-                            stopNegativeSound();
-
-                            // Clear the scanning timeout
-                            clearTimeout(scanTimeout);
-
-                            // Fetch the price associated with the barcode
-                            fetchPriceForBarcode(result.text);
-                        }
-                        if (err && !(err instanceof ZXing.NotFoundException)) {
-                            console.error(err);
-                        }
-                    });
-                } else {
-                    console.error("No video input devices found.");
-                    $('#message').html('<div class="alert alert-danger">لم يتم العثور على كاميرا!</div>');
-                    stopNegativeSound(); // Stop the negative sound
-                }
-            })
-            .catch(err => {
-                console.error("Error listing video devices:", err);
-                $('#message').html('<div class="alert alert-danger">خطأ في الوصول إلى الكاميرا.</div>');
-                stopNegativeSound(); // Stop the negative sound
+        $(document).ready(function () {
+            const beepSound = document.getElementById('beepSound');
+            const negativeToneSound = document.getElementById('negativeToneSound');
+            negativeToneSound.volume = 0.01; // Lower the volume of the negative tone sound
+            negativeToneSound.loop = true; // Set the negative sound to loop
+            let codeReader;
+            let scanTimeout; // To store the timeout for scanning
+        
+            // Initialize Dexie.js
+            const db = new Dexie("ProductDatabase");
+            db.version(1).stores({
+                products: '++id,barcode,price'
             });
-    });
-
-    // Function to fetch the price for a given barcode
-    function fetchPriceForBarcode(barcode) {
-        $.post('crud.php', { barcode: barcode, action: 'fetch' }, function (response) {
-            try {
-                const res = JSON.parse(response);
-                if (res.data && res.data.price) {
-                    // Update the price input field and display
-                    const formattedPrice = replaceCommaWithDot(res.data.price);
-                    $('#price').val(formattedPrice);
-                    $('#priceValue').text(formattedPrice); // Mirror the exact value
-                    $('#message').html('<div class="alert alert-info">تم جلب تفاصيل المنتج بنجاح!</div>');
-                } else {
-                    $('#message').html('<div class="alert alert-warning">المنتج غير موجود!</div>');
-                    playNegativeSound(); // Play negative sound if product not found
-                }
-            } catch (e) {
-                $('#message').html('<div class="alert alert-danger">خطأ في تحليل استجابة الخادم.</div>');
-                playNegativeSound(); // Play negative sound on parsing error
+        
+            // Function to replace commas with dots in the input
+            function replaceCommaWithDot(value) {
+                return value.replace(/,/g, '.');
             }
-        }).fail(function () {
-            $('#message').html('<div class="alert alert-danger">فشل في التواصل مع الخادم.</div>');
-            playNegativeSound(); // Play negative sound on server communication failure
-        });
-    }
-
-    // Handle form actions
-    $(".action-btn").on('click', function () {
-        const action = $(this).val();
-        const formData = {
-            barcode: $('#barcode').val(),
-            price: $('#price').val(),
-            action: action
-        };
-
-        console.log("Form Data:", formData);
-
-        $.post('crud.php', formData, function (response) {
-            try {
-                const res = JSON.parse(response);
-                $('#message').html('<div class="alert alert-info">' + res.message + '</div>');
-                if (res.data) {
+        
+            // Function to play the negative tone sound
+            function playNegativeSound() {
+                negativeToneSound.play().catch(error => {
+                    console.error("Error playing negative sound:", error);
+                });
+            }
+        
+            // Function to stop the negative tone sound
+            function stopNegativeSound() {
+                negativeToneSound.pause();
+                negativeToneSound.currentTime = 0; // Reset the sound to the beginning
+            }
+        
+            // Update the price display
+            $('#price').on('input', function () {
+                const price = $(this).val();
+                // Replace commas with dots in the input
+                const formattedPrice = replaceCommaWithDot(price);
+                // Update the green price display with the exact value
+                $('#priceValue').text(formattedPrice || '0.00');
+            });
+        
+            // Reset the form
+            $('#resetForm').on('click', function () {
+                $('#barcode').val('');
+                $('#price').val('');
+                $('#priceValue').text('0.00'); // Reset to 0.00
+                $('#message').html('');
+                $('#productList').html('');
+                $('#reader').hide();
+                if (codeReader) {
+                    codeReader.reset(); // Stop ZXing
+                }
+                stopNegativeSound(); // Stop the negative tone
+                clearTimeout(scanTimeout); // Clear the scanning timeout
+                $('#message').html('<div class="alert alert-info">تم إعادة تعيين النموذج بنجاح.</div>');
+            });
+        
+            // Initialize barcode scanning with ZXing
+            $('#scanBarcode').on('click', function () {
+                $('#reader').show();
+        
+                // Play the negative sound in a loop when the camera starts
+                playNegativeSound();
+        
+                // Start a timeout for scanning
+                scanTimeout = setTimeout(function () {
+                    // If no barcode is detected within 10 seconds, stop the scanner
+                    $('#message').html('<div class="alert alert-warning">فشل في الكشف عن الباركود. يرجى المحاولة مرة أخرى.</div>');
+                    stopNegativeSound(); // Stop the negative sound
+                    codeReader.reset(); // Stop ZXing
+                    $('#reader').hide(); // Hide the scanner
+                }, 10000); // 10 seconds timeout
+        
+                codeReader = new ZXing.BrowserMultiFormatReader();
+                console.log('ZXing code reader initialized');
+        
+                // List available video devices and use the back camera
+                codeReader.listVideoInputDevices()
+                    .then(videoInputDevices => {
+                        if (videoInputDevices.length > 0) {
+                            // Find the back camera
+                            const backCamera = videoInputDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear') || device.label.toLowerCase().includes('environment'));
+                            const deviceId = backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId; // Use back camera if found, else use the first camera
+                            codeReader.decodeFromVideoDevice(deviceId, 'video', (result, err) => {
+                                if (result) {
+                                    console.log("Barcode detected:", result.text);
+                                    $('#barcode').val(result.text);
+                                    $('#message').html('<div class="alert alert-success">تم الكشف عن الباركود بنجاح!</div>');
+        
+                                    // Play the beep sound
+                                    beepSound.play().catch(error => {
+                                        console.error("Error playing beep sound:", error);
+                                    });
+        
+                                    // Stop ZXing
+                                    codeReader.reset();
+                                    $('#reader').hide();
+        
+                                    // Stop the negative sound
+                                    stopNegativeSound();
+        
+                                    // Clear the scanning timeout
+                                    clearTimeout(scanTimeout);
+        
+                                    // Fetch the price associated with the barcode
+                                    fetchPriceForBarcode(result.text);
+                                }
+                                if (err && !(err instanceof ZXing.NotFoundException)) {
+                                    console.error(err);
+                                }
+                            });
+                        } else {
+                            console.error("No video input devices found.");
+                            $('#message').html('<div class="alert alert-danger">لم يتم العثور على كاميرا!</div>');
+                            stopNegativeSound(); // Stop the negative sound
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error listing video devices:", err);
+                        $('#message').html('<div class="alert alert-danger">خطأ في الوصول إلى الكاميرا.</div>');
+                        stopNegativeSound(); // Stop the negative sound
+                    });
+            });
+        
+            // Function to fetch the price for a given barcode
+            function fetchPriceForBarcode(barcode) {
+                db.products.where('barcode').equals(barcode).first().then(product => {
+                    if (product) {
+                        // Update the price input field and display
+                        const formattedPrice = replaceCommaWithDot(product.price);
+                        $('#price').val(formattedPrice);
+                        $('#priceValue').text(formattedPrice); // Mirror the exact value
+                        $('#message').html('<div class="alert alert-info">تم جلب تفاصيل المنتج بنجاح!</div>');
+                    } else {
+                        $('#message').html('<div class="alert alert-warning">المنتج غير موجود!</div>');
+                        playNegativeSound(); // Play negative sound if product not found
+                    }
+                }).catch(error => {
+                    $('#message').html('<div class="alert alert-danger">خطأ في جلب تفاصيل المنتج.</div>');
+                    playNegativeSound(); // Play negative sound on error
+                });
+            }
+        
+            // Handle form actions
+            $(".action-btn").on('click', function () {
+                const action = $(this).val();
+                const barcode = $('#barcode').val();
+                const price = $('#price').val();
+        
+                switch (action) {
+                    case 'create':
+                        db.products.add({ barcode: barcode, price: price }).then(() => {
+                            $('#message').html('<div class="alert alert-success">تم إنشاء المنتج بنجاح!</div>');
+                            fetchAllProducts();
+                        }).catch(error => {
+                            $('#message').html('<div class="alert alert-danger">خطأ في إنشاء المنتج.</div>');
+                            playNegativeSound();
+                        });
+                        break;
+        
+                    case 'read':
+                        fetchAllProducts();
+                        break;
+        
+                    case 'update':
+                        db.products.where('barcode').equals(barcode).modify({ price: price }).then(updated => {
+                            if (updated) {
+                                $('#message').html('<div class="alert alert-success">تم تحديث المنتج بنجاح!</div>');
+                                fetchAllProducts();
+                            } else {
+                                $('#message').html('<div class="alert alert-warning">المنتج غير موجود!</div>');
+                                playNegativeSound();
+                            }
+                        }).catch(error => {
+                            $('#message').html('<div class="alert alert-danger">خطأ في تحديث المنتج.</div>');
+                            playNegativeSound();
+                        });
+                        break;
+        
+                    case 'delete':
+                        db.products.where('barcode').equals(barcode).delete().then(deleted => {
+                            if (deleted) {
+                                $('#message').html('<div class="alert alert-success">تم حذف المنتج بنجاح!</div>');
+                                fetchAllProducts();
+                            } else {
+                                $('#message').html('<div class="alert alert-warning">المنتج غير موجود!</div>');
+                                playNegativeSound();
+                            }
+                        }).catch(error => {
+                            $('#message').html('<div class="alert alert-danger">خطأ في حذف المنتج.</div>');
+                            playNegativeSound();
+                        });
+                        break;
+        
+                    default:
+                        $('#message').html('<div class="alert alert-warning">إجراء غير معروف.</div>');
+                        playNegativeSound();
+                        break;
+                }
+            });
+        
+            // Function to fetch all products and display them
+            function fetchAllProducts() {
+                db.products.toArray().then(products => {
                     let tableHtml = '<table class="table table-striped">';
                     tableHtml += '<thead><tr><th>ID</th><th>Barcode</th><th>Price</th></tr></thead><tbody>';
-                    res.data.forEach(function (product) {
+                    products.forEach(product => {
                         tableHtml += `<tr><td>${product.id}</td><td>${product.barcode}</td><td>${replaceCommaWithDot(product.price)}</td></tr>`;
                     });
                     tableHtml += '</tbody></table>';
                     $('#productList').html(tableHtml);
-                }
-            } catch (e) {
-                $('#message').html('<div class="alert alert-danger">خطأ في تحليل استجابة الخادم.</div>');
-                playNegativeSound(); // Play negative sound on parsing error
+                }).catch(error => {
+                    $('#message').html('<div class="alert alert-danger">خطأ في جلب المنتجات.</div>');
+                    playNegativeSound();
+                });
             }
-        }).fail(function () {
-            $('#message').html('<div class="alert alert-danger">فشل في التواصل مع الخادم.</div>');
-            playNegativeSound(); // Play negative sound on server communication failure
         });
-    });
-});
-    </script>
+        </script>
 </body>
 </html>
