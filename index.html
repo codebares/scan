@@ -47,12 +47,18 @@
         <div class="modal-body">
           <!-- Barcode Input Field -->
           <div class="mb-3">
-            <input type="text" class="form-control" id="barcode" name="barcode" required placeholder="Barcode">
+            <label for="barcode" class="form-label">Barcode</label>
+            <input type="text" class="form-control" id="barcode" name="barcode" readonly>
+          </div>
+          <!-- Price Input Field (Only for Shop Owner) -->
+          <div class="mb-3" id="priceField">
+            <label for="price" class="form-label">Price</label>
+            <input type="text" class="form-control" id="price" name="price">
           </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-sm btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
-          <button class="btn btn-sm btn-success" type="button">Save</button>
+          <button class="btn btn-sm btn-success" type="button" id="saveButton">Save</button>
         </div>
       </div>
     </div>
@@ -254,8 +260,10 @@
     let scanTimeout;
     let currentStream;
     let torchStatus = false;
+    let currentUserType = null; // To store the current user type (customer or owner)
 
     function openScanner(userType) {
+      currentUserType = userType; // Set the current user type
       $('#cameraContainer').removeClass('d-none');
       startScanner(userType);
     }
@@ -279,6 +287,15 @@
 
                 // Display the barcode in the modal
                 $('#barcode').val(result.text); // Set the barcode value in the input field
+
+                // Show or hide the price field based on user type
+                if (currentUserType === 'owner') {
+                  $('#priceField').show(); // Show price field for Shop Owner
+                  $('#price').prop('readonly', false); // Allow editing
+                } else {
+                  $('#priceField').hide(); // Hide price field for Customer
+                }
+
                 const modal = new bootstrap.Modal(document.getElementById('bootstrapBasicModal')); // Initialize the modal
                 modal.show(); // Show the modal
 
@@ -351,6 +368,26 @@
       // Implement this function to fetch the price for the barcode
       console.log(`Fetching price for barcode: ${barcode} for ${userType}`);
     }
+
+    // Save button functionality
+    $('#saveButton').on('click', function () {
+      const barcode = $('#barcode').val();
+      const price = $('#price').val();
+
+      if (currentUserType === 'owner') {
+        // Save the barcode and price (Shop Owner functionality)
+        console.log(`Saving barcode: ${barcode}, price: ${price}`);
+        alert(`Barcode: ${barcode}, Price: ${price} saved successfully!`);
+      } else {
+        // Customer can only read the barcode and price
+        console.log(`Barcode: ${barcode}, Price: ${price}`);
+        alert(`Barcode: ${barcode}, Price: ${price}`);
+      }
+
+      // Close the modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('bootstrapBasicModal'));
+      modal.hide();
+    });
   </script>
 </body>
 
