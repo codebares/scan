@@ -36,6 +36,28 @@
 </head>
 
 <body>
+  <!-- Bootstrap Basic Modal -->
+  <div class="modal fade" id="bootstrapBasicModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title" id="exampleModalLabel">Barcode Detected</h6>
+          <button class="btn btn-close p-1 ms-auto" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Barcode Input Field -->
+          <div class="mb-3">
+            <input type="text" class="form-control" id="barcode" name="barcode" required placeholder="Barcode">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-sm btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-sm btn-success" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Preloader -->
   <div id="preloader">
     <div class="spinner-grow text-primary" role="status">
@@ -254,6 +276,12 @@
                 codeReader.reset();
                 clearTimeout(scanTimeout);
                 stopNegativeSound();
+
+                // Display the barcode in the modal
+                $('#barcode').val(result.text); // Set the barcode value in the input field
+                const modal = new bootstrap.Modal(document.getElementById('bootstrapBasicModal')); // Initialize the modal
+                modal.show(); // Show the modal
+
                 fetchPriceForBarcode(result.text, userType);
               }
               if (err && !(err instanceof ZXing.NotFoundException)) {
