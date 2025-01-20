@@ -164,7 +164,11 @@
   <!-- Full-screen camera container -->
   <div id="cameraContainer" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark">
     <video id="video" class="w-100 h-100"></video>
-    <button id="torchButton" class="btn btn-primary position-absolute top-0 end-0 m-3">Torch On</button>
+    <!-- Torch Switch -->
+    <div class="form-check form-switch position-absolute bottom-0 end-0 m-3">
+      <input class="form-check-input" type="checkbox" id="torchSwitch">
+      <label class="form-check-label text-white" for="torchSwitch">Torch</label>
+    </div>
   </div>
 
   <!-- Footer Nav -->
@@ -271,11 +275,11 @@
       }, 10000);
     }
 
-    $('#torchButton').on('click', function () {
-      if (torchStatus) {
-        turnOffTorch();
-      } else {
+    $('#torchSwitch').on('change', function () {
+      if (this.checked) {
         turnOnTorch();
+      } else {
+        turnOffTorch();
       }
     });
 
@@ -289,7 +293,6 @@
           }
           currentStream = stream;
           torchStatus = true;
-          $('#torchButton').text('Torch Off').removeClass('btn-primary').addClass('btn-danger');
         }).catch(error => {
           alert("Error accessing the camera.");
         });
@@ -303,7 +306,6 @@
             currentStream.getTracks().forEach(track => track.stop());
             currentStream = null;
             torchStatus = false;
-            $('#torchButton').text('Torch On').removeClass('btn-danger').addClass('btn-primary');
           })
           .catch(error => {
             alert("Error turning off the torch.");
