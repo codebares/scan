@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Affan - PWA Mobile HTML Template">
+  <meta name="description" content="Barcode Scan Application">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
   <!-- Title -->
-  <title>Affan - PWA Mobile HTML Template</title>
+  <title>Barcode Scan App</title>
 
   <!-- Favicon -->
   <link rel="icon" href="img/core-img/favicon.ico">
@@ -27,6 +27,9 @@
 
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json">
+
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -40,62 +43,123 @@
   <!-- Internet Connection Status -->
   <div class="internet-connection-status" id="internetStatus"></div>
 
-  <!-- Dark mode switching -->
-  <div class="dark-mode-switching">
-    <div class="d-flex w-100 h-100 align-items-center justify-content-center">
-      <div class="dark-mode-text text-center">
-        <i class="bi bi-moon"></i>
-        <p class="mb-0">Switching to dark mode</p>
-      </div>
-      <div class="light-mode-text text-center">
-        <i class="bi bi-brightness-high"></i>
-        <p class="mb-0">Switching to light mode</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- RTL mode switching -->
-  <div class="rtl-mode-switching">
-    <div class="d-flex w-100 h-100 align-items-center justify-content-center">
-      <div class="rtl-mode-text text-center">
-        <i class="bi bi-text-right"></i>
-        <p class="mb-0">Switching to RTL mode</p>
-      </div>
-      <div class="ltr-mode-text text-center">
-        <i class="bi bi-text-left"></i>
-        <p class="mb-0">Switching to default mode</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Header Area-->
+  <!-- Header Area -->
   <div class="header-area" id="headerArea">
     <div class="container">
-      <!-- Header Content-->
-      <div class="header-content header-style-four position-relative d-flex align-items-center justify-content-between">
-        <!-- Back Button-->
-        <div class="back-button">
+      <!-- Header Content -->
+      <div class="header-content header-style-five position-relative d-flex align-items-center justify-content-between">
+        <!-- Logo Wrapper -->
+        <div class="logo-wrapper">
           <a href="home.html">
-            <i class="bi bi-arrow-left-short"></i>
+            <img src="img/core-img/logo.png" alt="">
           </a>
         </div>
 
-        <!-- Page Title-->
-        <div class="page-heading">
-          <h6 class="mb-0">Settings</h6>
-        </div>
-
-        <!-- User Profile-->
-        <div class="user-profile-wrapper">
-          <a class="user-profile-trigger-btn" href="#">
-            <img src="img/bg-img/20.jpg" alt="">
-          </a>
+        <!-- Navbar Toggler -->
+        <div class="navbar--toggler" id="affanNavbarToggler" data-bs-toggle="offcanvas" data-bs-target="#affanOffcanvas"
+          aria-controls="affanOffcanvas">
+          <span class="d-block"></span>
+          <span class="d-block"></span>
+          <span class="d-block"></span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="page-content-wrapper py-3">
+  <!-- # Sidenav Left -->
+  <div class="offcanvas offcanvas-start" id="affanOffcanvas" data-bs-scroll="true" tabindex="-1"
+    aria-labelledby="affanOffcanvsLabel">
+
+    <button class="btn-close btn-close-white text-reset" type="button" data-bs-dismiss="offcanvas"
+      aria-label="Close"></button>
+
+    <div class="offcanvas-body p-0">
+      <div class="sidenav-wrapper">
+        <!-- Sidenav Profile -->
+        <div class="sidenav-profile bg-gradient">
+          <div class="sidenav-style1"></div>
+
+          <!-- User Thumbnail -->
+          <div class="user-profile">
+            <img src="img/bg-img/2.jpg" alt="">
+          </div>
+
+          <!-- User Info -->
+          <div class="user-info">
+            <h6 class="user-name mb-0">Shop Owner</h6>
+            <span>Barcode Scan App</span>
+          </div>
+        </div>
+
+        <!-- Sidenav Nav -->
+        <ul class="sidenav-nav ps-0">
+          <li>
+            <a href="home.html"><i class="bi bi-house-door"></i> Home</a>
+          </li>
+          <li>
+            <a href="scans.html"><i class="bi bi-upc-scan"></i> Scans</a>
+          </li>
+          <li>
+            <a href="history.html"><i class="bi bi-list-ul"></i> Scan History</a>
+          </li>
+          <li>
+            <a href="settings.html"><i class="bi bi-gear"></i> Settings</a>
+          </li>
+          <li>
+            <div class="night-mode-nav">
+              <i class="bi bi-moon"></i> Night Mode
+              <div class="form-check form-switch">
+                <input class="form-check-input form-check-success" id="darkSwitch" type="checkbox">
+              </div>
+            </div>
+          </li>
+          <li>
+            <a href="login.html"><i class="bi bi-box-arrow-right"></i> Logout</a>
+          </li>
+        </ul>
+
+        <!-- Social Info -->
+        <div class="social-info-wrap">
+          <a href="#">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a href="#">
+            <i class="bi bi-twitter"></i>
+          </a>
+          <a href="#">
+            <i class="bi bi-linkedin"></i>
+          </a>
+        </div>
+
+        <!-- Copyright Info -->
+        <div class="copyright-info">
+          <p>
+            <span id="copyrightYear"></span>
+            &copy; Barcode Scan App
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="page-content-wrapper">
+    <div class="container">
+      <div class="d-flex flex-column align-items-center justify-content-center vh-100 gap-3">
+        <!-- Customer Button -->
+        <button class="btn btn-primary btn-lg" onclick="openScanner('customer')">
+          <i class="bi bi-upc-scan"></i> Customer Scan
+        </button>
+        <!-- Shop Owner Button -->
+        <button class="btn btn-success btn-lg" onclick="openScanner('owner')">
+          <i class="bi bi-upc-scan"></i> Shop Owner Scan
+        </button>
+        <!-- Torch Button -->
+        <button id="torchButton" class="btn btn-secondary btn-lg" disabled>
+          <i class="bi bi-lightbulb"></i> Turn On Torch
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Footer Nav -->
@@ -104,7 +168,7 @@
       <!-- Footer Content -->
       <div class="footer-nav position-relative">
         <ul class="h-100 d-flex align-items-center justify-content-between ps-0">
-          <li>
+          <li class="active">
             <a href="home.html">
               <i class="bi bi-house"></i>
               <span>Home</span>
@@ -112,27 +176,20 @@
           </li>
 
           <li>
-            <a href="pages.html">
-              <i class="bi bi-folder2-open"></i>
-              <span>Pages</span>
+            <a href="scans.html">
+              <i class="bi bi-upc-scan"></i>
+              <span>Scans</span>
             </a>
           </li>
 
           <li>
-            <a href="elements.html">
-              <i class="bi bi-heart"></i>
-              <span>Elements</span>
+            <a href="history.html">
+              <i class="bi bi-list-ul"></i>
+              <span>History</span>
             </a>
           </li>
 
           <li>
-            <a href="chat-users.html">
-              <i class="bi bi-chat-dots"></i>
-              <span>Chat</span>
-            </a>
-          </li>
-
-          <li class="active">
             <a href="settings.html">
               <i class="bi bi-gear"></i>
               <span>Settings</span>
@@ -158,6 +215,78 @@
   <script src="js/dark-rtl.js"></script>
   <script src="js/active.js"></script>
   <!-- <script src="js/pwa.js"></script> -->
+
+  <script>
+    // Torch functionality
+    let torchStatus = false;
+    let currentStream = null;
+    const torchButton = document.getElementById('torchButton');
+
+    // Check for flashlight support
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+        const flashlight = devices.find(device => device.kind === 'videoinput');
+        if (flashlight) {
+          torchButton.disabled = false;
+        }
+      });
+    }
+
+    torchButton.addEventListener('click', function () {
+      if (torchStatus) {
+        turnOffTorch();
+      } else {
+        turnOnTorch();
+      }
+    });
+
+    function turnOnTorch() {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(stream => {
+          const track = stream.getVideoTracks()[0];
+          const capabilities = track.getCapabilities();
+          if (capabilities.torch) {
+            track.applyConstraints({ advanced: [{ torch: true }] });
+          }
+          currentStream = stream;
+          torchStatus = true;
+          torchButton.textContent = "Turn Off Torch";
+          torchButton.classList.remove('btn-secondary');
+          torchButton.classList.add('btn-warning');
+        }).catch(error => {
+          alert("Error accessing the camera.");
+        });
+    }
+
+    function turnOffTorch() {
+      if (currentStream) {
+        const track = currentStream.getVideoTracks()[0];
+        track.applyConstraints({ advanced: [{ torch: false }] })
+          .then(() => {
+            currentStream.getTracks().forEach(track => track.stop()); // Stop all tracks
+            currentStream = null;
+            torchStatus = false;
+            torchButton.textContent = "Turn On Torch";
+            torchButton.classList.remove('btn-warning');
+            torchButton.classList.add('btn-secondary');
+          })
+          .catch(error => {
+            alert("Error turning off the torch.");
+          });
+      }
+    }
+
+    // Scanner functionality
+    function openScanner(userType) {
+      if (userType === 'customer') {
+        alert("Customer Scan: Read price only.");
+        // Add logic for customer barcode scanning
+      } else if (userType === 'owner') {
+        alert("Shop Owner Scan: Add or update price.");
+        // Add logic for shop owner barcode scanning
+      }
+    }
+  </script>
 </body>
 
 </html>
